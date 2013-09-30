@@ -55,7 +55,7 @@ when "debian", "ubuntu"
   default['apache']['cgibin_dir'] = "/usr/lib/cgi-bin"
   default['apache']['icondir'] = "/usr/share/apache2/icons"
   default['apache']['cache_dir'] = "/var/cache/apache2"
-  default['apache']['pid_file']  = "/var/run/apache2.pid"
+  default['apache']['pid_file']  = "${APACHE_PID_FILE}"
   default['apache']['lib_dir'] = "/usr/lib/apache2"
   default['apache']['libexecdir'] = "#{node['apache']['lib_dir']}/modules"
   default['apache']['default_site_enabled'] = false
