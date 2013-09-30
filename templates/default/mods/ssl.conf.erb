@@ -51,15 +51,10 @@ SSLSessionCacheTimeout  300
 #   Semaphore:
 #   Configure the path to the mutual exclusion semaphore the
 #   SSL engine uses internally for inter-process synchronization.
-<% if %w{ rhel fedora suse }.include?(node['platform_family']) -%>
-SSLMutex  default
-<% elsif %w{ freebsd }.include?(node['platform_family']) -%>
-SSLMutex  file:/var/run/ssl_mutex
-<% else -%>
-SSLMutex  file:/var/run/apache2/ssl_mutex
-<% end -%>
+#   (Disabled by default, the global Mutex directive consolidates by default
+#   this)
+#Mutex file:${APACHE_LOCK_DIR}/ssl_mutex ssl-cache
 
-SSLHonorCipherOrder On
 #   SSL Cipher Suite:
 #   List the ciphers that the client is permitted to negotiate.
 #   See the mod_ssl documentation for a complete list.

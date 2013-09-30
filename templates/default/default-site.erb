@@ -9,8 +9,7 @@
         <Directory <%= node['apache']['docroot_dir'] %>/>
                 Options Indexes FollowSymLinks MultiViews
                 AllowOverride None
-                Order allow,deny
-                allow from all
+                Require all granted
                 # This directive allows us to have apache2's default start page
                 # in /apache2-default/, but still have / go to the right place
                 #RedirectMatch ^/$ /apache2-default/
@@ -20,8 +19,7 @@
         <Directory "<%= node['apache']['cgibin_dir'] %>">
                 AllowOverride None
                 Options ExecCGI -MultiViews +SymLinksIfOwnerMatch
-                Order allow,deny
-                Allow from all
+                Require all granted
         </Directory>
 
         ErrorLog <%= node['apache']['log_dir'] %>/<%= node['apache']['error_log'] %>
@@ -37,9 +35,7 @@
         <Directory "/usr/share/doc/">
             Options Indexes MultiViews FollowSymLinks
             AllowOverride None
-            Order deny,allow
-            Deny from all
-            Allow from 127.0.0.0/255.0.0.0 ::1/128
+            Require host 127.0.0.0/255.0.0.0 ::1/128
         </Directory>
 
         <% if %w{ rhel fedora }.include?(node['platform_family']) -%>

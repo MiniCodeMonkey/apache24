@@ -6,17 +6,6 @@
 ServerRoot "<%= node['apache']['dir'] %>"
 
 #
-# The accept serialization lock file MUST BE STORED ON A LOCAL DISK.
-#
-<% if %w{debian}.include?(node['platform_family']) -%>
-LockFile /var/lock/apache2/accept.lock
-<% elsif %w{freebsd}.include?(node['platform_family']) -%>
-LockFile /var/log/accept.lock
-<% else %>
-LockFile logs/accept.lock
-<% end -%>
-
-#
 # PidFile: The file in which the server should record its process
 # identification number when it starts.
 #
@@ -54,28 +43,28 @@ KeepAliveTimeout <%= node['apache']['keepalivetimeout'] %>
 # StartServers: number of server processes to start
 # MinSpareServers: minimum number of server processes which are kept spare
 # MaxSpareServers: maximum number of server processes which are kept spare
-# MaxClients: maximum number of server processes allowed to start
-# MaxRequestsPerChild: maximum number of requests a server process serves
+# MaxRequestWorkers: maximum number of server processes allowed to start
+# MaxConnectionsPerChild: maximum number of requests a server process serves
 <IfModule mpm_prefork_module>
     StartServers          <%= node['apache']['prefork']['startservers'] %>
     MinSpareServers       <%= node['apache']['prefork']['minspareservers'] %>
     MaxSpareServers       <%= node['apache']['prefork']['maxspareservers'] %>
     ServerLimit           <%= node['apache']['prefork']['serverlimit'] %>
-    MaxClients            <%= node['apache']['prefork']['maxclients'] %>
-    MaxRequestsPerChild   <%= node['apache']['prefork']['maxrequestsperchild'] %>
+    MaxRequestWorkers     <%= node['apache']['prefork']['maxclients'] %>
+    MaxConnectionsPerChild   <%= node['apache']['prefork']['maxrequestsperchild'] %>
 </IfModule>
 
 # worker MPM
 # StartServers: initial number of server processes to start
-# MaxClients: maximum number of simultaneous client connections
+# MaxRequestWorkers: maximum number of simultaneous client connections
 # MinSpareThreads: minimum number of worker threads which are kept spare
 # MaxSpareThreads: maximum number of worker threads which are kept spare
 # ThreadsPerChild: constant number of worker threads in each server process
-# MaxRequestsPerChild: maximum number of requests a server process serves
+# MaxConnectionsPerChild: maximum number of requests a server process serves
 <IfModule mpm_worker_module>
     StartServers          <%= node['apache']['worker']['startservers'] %>
     ServerLimit           <%= node['apache']['worker']['serverlimit'] %>
-    MaxClients            <%= node['apache']['worker']['maxclients'] %>
+    MaxRequestWorkers     <%= node['apache']['worker']['maxclients'] %>
     MinSpareThreads       <%= node['apache']['worker']['minsparethreads'] %>
     MaxSpareThreads       <%= node['apache']['worker']['maxsparethreads'] %>
     ThreadsPerChild       <%= node['apache']['worker']['threadsperchild'] %>
@@ -98,8 +87,7 @@ AccessFileName .htaccess
 # viewed by Web clients. 
 #
 <Files ~ "^\.ht">
-    Order allow,deny
-    Deny from all
+    Require all denied
 </Files>
 
 #
@@ -167,72 +155,8 @@ LogFormat "%{Referer}i -> %U" referer
 LogFormat "%{User-agent}i" agent
 #
 
-# Customizable error responses come in three flavors:
-# 1) plain text 2) local redirects 3) external redirects
-#
-# Some examples:
-#ErrorDocument 500 "The server made a boo boo."
-#ErrorDocument 404 /missing.html
-#ErrorDocument 404 "/cgi-bin/missing_handler.pl"
-#ErrorDocument 402 http://www.example.com/subscription_info.html
-#
-
-#
-# Putting this all together, we can internationalize error responses.
-#
-# We use Alias to redirect any /error/HTTP_<error>.html.var response to
-# our collection of by-error message multi-language collections.  We use 
-# includes to substitute the appropriate text.
-#
-# You can modify the messages' appearance without changing any of the
-# default HTTP_<error>.html.var files by adding the line:
-#
-#   Alias /error/include/ "/your/include/path/"
-#
-# which allows you to create your own set of files by starting with the
-# /usr/share/apache2/error/include/ files and copying them to /your/include/path/, 
-# even on a per-VirtualHost basis.  The default include files will display
-# your Apache version number and your ServerAdmin email address regardless
-# of the setting of ServerSignature.
-#
-# The internationalized error documents require mod_alias, mod_include
-# and mod_negotiation.  To activate them, uncomment the following 30 lines.
-
-#    Alias /error/ "/usr/share/apache2/error/"
-#
-#    <Directory "/usr/share/apache2/error">
-#        AllowOverride None
-#        Options IncludesNoExec
-#        AddOutputFilter Includes html
-#        AddHandler type-map var
-#        Order allow,deny
-#        Allow from all
-#        LanguagePriority en cs de es fr it nl sv pt-br ro
-#        ForceLanguagePriority Prefer Fallback
-#    </Directory>
-#
-#    ErrorDocument 400 /error/HTTP_BAD_REQUEST.html.var
-#    ErrorDocument 401 /error/HTTP_UNAUTHORIZED.html.var
-#    ErrorDocument 403 /error/HTTP_FORBIDDEN.html.var
-#    ErrorDocument 404 /error/HTTP_NOT_FOUND.html.var
-#    ErrorDocument 405 /error/HTTP_METHOD_NOT_ALLOWED.html.var
-#    ErrorDocument 408 /error/HTTP_REQUEST_TIME_OUT.html.var
-#    ErrorDocument 410 /error/HTTP_GONE.html.var
-#    ErrorDocument 411 /error/HTTP_LENGTH_REQUIRED.html.var
-#    ErrorDocument 412 /error/HTTP_PRECONDITION_FAILED.html.var
-#    ErrorDocument 413 /error/HTTP_REQUEST_ENTITY_TOO_LARGE.html.var
-#    ErrorDocument 414 /error/HTTP_REQUEST_URI_TOO_LARGE.html.var
-#    ErrorDocument 415 /error/HTTP_UNSUPPORTED_MEDIA_TYPE.html.var
-#    ErrorDocument 500 /error/HTTP_INTERNAL_SERVER_ERROR.html.var
-#    ErrorDocument 501 /error/HTTP_NOT_IMPLEMENTED.html.var
-#    ErrorDocument 502 /error/HTTP_BAD_GATEWAY.html.var
-#    ErrorDocument 503 /error/HTTP_SERVICE_UNAVAILABLE.html.var
-#    ErrorDocument 506 /error/HTTP_VARIANT_ALSO_VARIES.html.var
-
-
-
 # Include generic snippets of statements
-Include <%= node['apache']['dir'] %>/conf.d/*.conf
+IncludeOptional <%= node['apache']['dir'] %>/conf-enabled/*.conf
 
 # Include the virtual host configurations:
-Include <%= node['apache']['dir'] %>/sites-enabled/
+IncludeOptional <%= node['apache']['dir'] %>/sites-enabled/*.conf

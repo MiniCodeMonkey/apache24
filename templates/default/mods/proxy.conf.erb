@@ -6,9 +6,7 @@
 
         <Proxy *>
                 AddDefaultCharset off
-                Order deny,allow
-                Deny from all
-                #Allow from .example.com
+                Require all denied
         </Proxy>
 
         # Enable/disable the handling of HTTP/1.1 "Via:" headers.

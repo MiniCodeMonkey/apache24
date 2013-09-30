@@ -1,3 +1,5 @@
+Fork of the official Opscode Apache2 cookbook that provides support for Apache 2.4
+
 Description
 ===========
 
